@@ -1,3 +1,4 @@
+
 var gameOfLife = {
   width: 20,
   height: 20,
@@ -29,6 +30,16 @@ var gameOfLife = {
                   and pass into func, the cell and the cell's x & y
                   coordinates. For example: iteratorFunc(cell, x, y)
     */
+    var tBody = document.getElementsByTagName('tbody')[0];
+
+    for (var i=0; i<tBody.children.length; i++) {
+      for (var j=0; j<tBody.children[i].children.length; j++) {
+        var currentCell = tBody.children[i].children[j];
+        //console.dir(currentCell);
+        iteratorFunc(currentCell, j,i);
+      }
+    }
+
   },
 
   toggleCell: function(cell) {
@@ -73,6 +84,39 @@ var gameOfLife = {
   countAliveNeighbors: function() {
     this.forEachCell(function (cell, x, y) {
         var aliveNeighbors = 0;
+ 
+        var neighbors = [];
+        if(cell.nextSibling) neighbors.push(cell.nextSibling);
+        if(cell.previousSibling) neighbors.push(cell.previousSibling);
+        var topRightCorner = document.getElementById((x+1) + '-' + (y-1));
+        if(topRightCorner){
+          neighbors.push(topRightCorner);
+        }
+        var topLeftCorner = document.getElementById((x-1) + '-' + (y-1));
+        if(topLeftCorner){
+          neighbors.push(topLeftCorner);
+        }
+        var botRightCorner = document.getElementById((x+1) + '-' + (y+1));
+        if(botRightCorner){
+          neighbors.push(botRightCorner);
+        }
+        var botLeftCorner = document.getElementById((x-1) + '-' + (y+1));
+        if(botLeftCorner){
+          neighbors.push(botLeftCorner);
+        }
+        var bot = document.getElementById((x) + '-' + (y+1));
+        if(bot){
+          neighbors.push(bot);
+        }
+        var top = document.getElementById((x) + '-' + (y-1));
+        if(top){
+          neighbors.push(top);
+        }
+
+       neighbors.forEach(function(nei){
+          if(nei.className == "alive") aliveNeighbors++;
+        });
+
 
         /*
             COLLEGE.JS: Given the cell object, find the neighbors and figure out
@@ -88,6 +132,15 @@ var gameOfLife = {
       /* 
         COLLEGE.JS: Apply rules of Game of Life and return "dead" or "alive"
       */
+      if (currentState === 'alive') {
+        if (numAliveNeighbors < 2 || numAliveNeighbors > 3) {
+          return 'dead';
+        }
+        else return 'alive';
+      }
+      else {
+        if (numAliveNeighbors === 3) return 'alive';
+      }
     };
 
     this.forEachCell(function (cell, x, y) {
@@ -103,16 +156,17 @@ var gameOfLife = {
   },
 
   step: function () {
+
+    console.log(this);
+
     this.countAliveNeighbors();
     this.determineAndSetNextState();
+    //console.log("This button is working");
+
   },
 
   togglePlayPause: function () {
-    if (!this.stepInterval) {
-      $('#play_btn').text("Play").attr('class', 'btn btn-primary');
-    } else {
-      $('#play_btn').text("Pause").attr('class', 'btn btn-danger');
-    }
+ 
   },
 
   enableAutoPlay: function () {
@@ -123,6 +177,24 @@ var gameOfLife = {
                   to toggle the button between "Play" and "Pause".
 
     */
+
+
+    var self = this;
+
+    if(!this.stepInterval){
+          $('#play_btn').text("Pause").attr('class', 'btn btn-danger');
+
+          this.stepInterval = setInterval(function(){
+              self.step();
+          }, 200);
+    }else{
+        $('#play_btn').text("Play").attr('class', 'btn btn-primary');
+
+        clearInterval(this.stepInterval);
+        this.stepInterval = null;
+    }
+
+
   }
 };
 
